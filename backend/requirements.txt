@@ -1,0 +1,12 @@
+# Backend requirements
+fastapi
+uvicorn
+scikit-learn
+pandas
+sqlalchemy
+asyncpg
+psycopg2-binary
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+alembic

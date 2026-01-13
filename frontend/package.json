@@ -1,0 +1,10 @@
+# Frontend dependencies
+# Install with: npm install
+react
+react-dom
+vite
+tailwindcss
+postcss
+autoprefixer
+axios
+jwt-decode
