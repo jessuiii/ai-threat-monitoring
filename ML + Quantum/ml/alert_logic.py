@@ -1,0 +1,12 @@
+def classify_risk(final_risk):
+    labels = []
+
+    for r in final_risk:
+        if r >= 0.8:
+            labels.append("🚨 High Risk")
+        elif r >= 0.5:
+            labels.append("⚠️ Suspicious")
+        else:
+            labels.append("✅ Normal")
+
+    return labels
