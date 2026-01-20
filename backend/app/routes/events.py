@@ -1,49 +1,42 @@
-# app/routes/events.py
-from fastapi import APIRouter
-from app.services.pipeline import handle_event
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 from app.database import SessionLocal
-from app.models import NetworkEvent
+from app.schemas import NetworkEventIn, PredictionOut
+from app.services.pipeline import handle_event
 
 router = APIRouter()
 
-
-@router.post("/")
-def ingest_event(event: dict):
-    return handle_event(event)
-
-
-@router.post("/predict")
-def predict_only(event: dict):
-    """
-    Prediction without storing in DB
-    """
-    return handle_event(event)
-
-
-@router.get("/")
-def get_events(limit: int = 50):
+def get_db():
     db = SessionLocal()
     try:
-        events = (
-            db.query(NetworkEvent)
-            .order_by(NetworkEvent.timestamp.desc())
-            .limit(limit)
-            .all()
-        )
-
-        return [
-            {
-                "src_ip": e.src_ip,
-                "rate": e.rate,
-                "spkts": e.spkts,
-                "sbytes": e.sbytes,
-
-                # 🔥 UPDATED RESPONSE
-                "attack_type": e.attack_type,
-                "confidence": e.confidence,
-                "threat_distance": e.threat_distance,
-            }
-            for e in events
-        ]
+        yield db
     finally:
         db.close()
+
+@router.post("/", response_model=PredictionOut)
+def ingest_event(event: NetworkEventIn, db: Session = Depends(get_db)):
+    return handle_event(event, db)
+
+@router.get("/")
+def get_events(limit: int = 50, db: Session = Depends(get_db)):
+    from app.models import NetworkEvent
+
+    rows = (
+        db.query(NetworkEvent)
+        .order_by(NetworkEvent.timestamp.desc())
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "src_ip": r.src_ip,
+            "rate": r.rate,
+            "spkts": r.spkts,
+            "sbytes": r.sbytes,
+            "attack_type": r.attack_type,
+            "confidence": r.confidence,
+            "threat_distance": r.threat_distance,
+        }
+        for r in rows
+    ]

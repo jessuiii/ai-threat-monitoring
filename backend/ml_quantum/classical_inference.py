@@ -4,6 +4,7 @@ import joblib
 import pandas as pd
 from ml_quantum.preprocess import preprocess
 
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "rf_ids_model.pkl")
 
@@ -33,13 +34,11 @@ def predict_attack(df: pd.DataFrame):
     probs = bundle["model"].predict_proba(X)[0]
     classes = bundle["classes"]
 
-    result = dict(zip(classes, probs))
-
-    predicted_attack = classes[probs.argmax()]
-    confidence = probs.max()
+    predicted = classes[probs.argmax()]
+    confidence = float(probs.max())
 
     return {
-        "attack_type": predicted_attack,
-        "confidence": float(confidence),
-        "distribution": result
+        "attack_type": predicted,
+        "confidence": confidence,
+        "distribution": dict(zip(classes, probs)),
     }

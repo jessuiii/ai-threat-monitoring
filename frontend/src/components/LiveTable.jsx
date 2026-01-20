@@ -11,8 +11,10 @@ export default function LiveTable() {
       try {
         const res = await fetch(BACKEND_URL);
         if (!res.ok) throw new Error("Backend not reachable");
+
         const data = await res.json();
         setEvents(data);
+        setError(null);
       } catch (err) {
         setError(err.message);
       }
@@ -41,7 +43,7 @@ export default function LiveTable() {
               <th className="p-2 border">Rate</th>
               <th className="p-2 border">Packets</th>
               <th className="p-2 border">Bytes</th>
-              <th className="p-2 border">Prediction</th>
+              <th className="p-2 border">Attack Type</th>
               <th className="p-2 border">Confidence</th>
               <th className="p-2 border">Threat Distance</th>
             </tr>
@@ -59,12 +61,20 @@ export default function LiveTable() {
             {events.map((e, idx) => (
               <tr key={idx} className="odd:bg-gray-50">
                 <td className="p-2 border">{e.src_ip}</td>
-                <td className="p-2 border">{Number(e.rate).toFixed(2)}</td>
+                <td className="p-2 border">
+                  {Number(e.rate ?? 0).toFixed(2)}
+                </td>
                 <td className="p-2 border">{e.spkts}</td>
                 <td className="p-2 border">{e.sbytes}</td>
-                <td className="p-2 border">{e.prediction}</td>
-                <td className="p-2 border">{e.confidence}</td>
-                <td className="p-2 border">{e.threat_distance}</td>
+                <td className="p-2 border font-medium">
+                  {e.attack_type}
+                </td>
+                <td className="p-2 border">
+                  {(e.confidence ?? 0).toFixed(3)}
+                </td>
+                <td className="p-2 border">
+                  {(e.threat_distance ?? 0).toFixed(3)}
+                </td>
               </tr>
             ))}
           </tbody>

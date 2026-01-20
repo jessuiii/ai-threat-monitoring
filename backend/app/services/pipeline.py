@@ -1,27 +1,22 @@
-# app/services/pipeline.py
 from datetime import datetime
-from app.database import SessionLocal
+from sqlalchemy.orm import Session
 from app.models import NetworkEvent
 from app.services.ml_engine import predict_event
 
-
-def handle_event(event: dict):
-    print("🔥 Incoming event:", event)
-    db = SessionLocal()
-
+def handle_event(event, db: Session):
     try:
-        result = predict_event(event, key=event["src_ip"])
+        payload = event.dict()
+
+        result = predict_event(payload, key=payload["src_ip"])
 
         record = NetworkEvent(
-            timestamp=datetime.fromtimestamp(event["timestamp"]),
-            src_ip=event["src_ip"],
-            rate=event["rate"],
-            spkts=event["spkts"],
-            sbytes=event["sbytes"],
-            ct_src_dport_ltm=event["ct_src_dport_ltm"],
-            ct_srv_src=event["ct_srv_src"],
-
-            # 🔥 UPDATED
+            timestamp=datetime.fromtimestamp(payload["timestamp"]),
+            src_ip=payload["src_ip"],
+            rate=payload["rate"],
+            spkts=payload["spkts"],
+            sbytes=payload["sbytes"],
+            ct_src_dport_ltm=payload["ct_src_dport_ltm"],
+            ct_srv_src=payload["ct_srv_src"],
             attack_type=result["attack_type"],
             confidence=result["confidence"],
             threat_distance=result["threat_distance"],
@@ -34,8 +29,5 @@ def handle_event(event: dict):
 
     except Exception as e:
         db.rollback()
-        print("❌ DB ERROR:", e)
-        raise e
-
-    finally:
-        db.close()
+        print("❌ PIPELINE ERROR:", e)
+        raise
