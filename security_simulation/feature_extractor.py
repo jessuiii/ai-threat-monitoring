@@ -1,4 +1,3 @@
-# security_simulation/feature_extractor.py
 from collections import defaultdict, deque
 import time
 
@@ -18,26 +17,24 @@ def extract(packet):
     byte_count[src] += int(packet.length)
     timestamps[src].append(now)
 
-    # Rate
     elapsed = now - timestamps[src][0] if len(timestamps[src]) > 1 else 1
     rate = packet_count[src] / elapsed
 
-    # 🔥 Burst rate
-    burst_rate = (
-        len(timestamps[src]) /
-        max(timestamps[src][-1] - timestamps[src][0], 0.001)
+    burst_rate = len(timestamps[src]) / max(
+        timestamps[src][-1] - timestamps[src][0], 0.001
     )
 
     if hasattr(packet, "tcp"):
         port_set[src].add(packet.tcp.dstport)
 
     return {
-        "timestamp": float(now),
+        "timestamp": now,
         "src_ip": src,
-        "rate": float(rate),
-        "burst_rate": float(burst_rate),
-        "spkts": int(packet_count[src]),
-        "sbytes": int(byte_count[src]),
-        "ct_src_dport_ltm": int(len(port_set[src])),
-        "ct_srv_src": int(packet_count[src]),
+        "rate": rate,
+        "burst_rate": burst_rate,
+        "spkts": packet_count[src],
+        "sbytes": byte_count[src],
+        "ct_src_dport_ltm": len(port_set[src]),
+        "ct_srv_src": packet_count[src],
+        "true_attack": packet.attack_type
     }
