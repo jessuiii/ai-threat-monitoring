@@ -1,5 +1,3 @@
-Here’s a **clean, accurate, copy-paste–ready README** rewritten from your content, **with Docker removed** and aligned to what you’ve actually built so far.
-
 ---
 
 ```md
