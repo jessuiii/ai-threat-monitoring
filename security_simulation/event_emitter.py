@@ -8,13 +8,13 @@ from ml_quantum.alert_logic import classify_risk
 def run():
     for packet in packet_stream():
         features = extract(packet)
-        if not features:
+
+        # No window ready yet
+        if features is None:
             continue
 
-        # Convert single event → DataFrame (ML expects DF)
         df = pd.DataFrame([features])
 
-        # ML inference
         risk = classical_risk(df)[0]
         alert = classify_risk([risk])[0]
 
