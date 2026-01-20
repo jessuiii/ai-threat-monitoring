@@ -1,22 +1,22 @@
-```md
-# AI-Powered Threat Monitoring & Security Analytics Platform  
+
+# AI-Powered Threat Monitoring & Security Analytics Platform
 ### UNSW-NB15 — MVP
 
 ## Overview
 
 This repository contains a **minimum viable product (MVP)** for an AI-powered cyber threat monitoring and security analytics platform built using the **UNSW-NB15 intrusion detection dataset**.
 
-The project focuses on detecting, simulating, and analyzing network-based threats using classical machine learning models, a backend API, and a modern frontend dashboard. It is designed to be modular, extensible, and suitable for research, learning, and portfolio demonstration.
+The project focuses on detecting, simulating, and analyzing network-based threats using classical machine learning models, a backend API, and a modern frontend dashboard. It is designed to be modular, explainable, and extensible for research, learning, and portfolio demonstration.
 
 ---
 
 ## Tech Stack
 
-- **Backend:** Python, FastAPI  
-- **Machine Learning:** Scikit-learn (Random Forest, Logistic Regression)  
-- **Frontend:** React, Vite, Tailwind CSS  
-- **Data:** UNSW-NB15 dataset (CSV)  
-- **Simulation:** Custom Python scripts for synthetic attack generation  
+- **Backend:** Python, FastAPI
+- **Machine Learning:** Scikit-learn (Random Forest, Logistic Regression)
+- **Frontend:** React, Vite, Tailwind CSS
+- **Data:** UNSW-NB15 dataset (CSV format)
+- **Simulation:** Custom Python scripts for synthetic attack and traffic generation
 
 ---
 
@@ -48,11 +48,11 @@ security_simulation/     # Attack traffic and log simulation tools
 ## Features
 
 - API-based log ingestion (batch and simulated data)
-- Machine-learning-driven threat detection
+- Machine-learning-driven intrusion detection
 - Modular ML training, inference, and evaluation pipelines
-- Synthetic attack and traffic simulation
+- Synthetic attack and network traffic simulation
 - Confidence-aware predictions
-- Interactive frontend dashboard for alerts and live data
+- Interactive frontend dashboard for alerts and live monitoring
 - Clean and scalable project architecture
 
 ---
@@ -60,6 +60,7 @@ security_simulation/     # Attack traffic and log simulation tools
 ## Local Setup (Without Docker)
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/jessuiii/ai-threat-monitoring.git
 cd ai-threat-monitoring
@@ -76,7 +77,7 @@ source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Run the backend:
+Run the backend server:
 
 ```bash
 uvicorn app.main:app --reload
@@ -98,7 +99,7 @@ npm install
 npm run dev
 ```
 
-Frontend will be available at:
+Frontend application will be available at:
 
 ```
 http://localhost:5173
@@ -111,7 +112,7 @@ http://localhost:5173
 * AI-assisted intrusion detection research
 * Security analytics and SOC dashboard prototyping
 * Machine learning experimentation on network traffic data
-* Academic, learning, and portfolio projects in cybersecurity
+* Academic, learning, and portfolio cybersecurity projects
 
 ---
 
@@ -119,25 +120,23 @@ http://localhost:5173
 
 This project currently represents an **early-stage MVP**. Planned future enhancements include:
 
-* Advanced model explainability visualizations
-* Real-time data streaming
+* Advanced model explainability and visualization
+* Real-time data streaming and ingestion
 * Authentication and role-based access control
 * Alerting and notification pipelines
-* Production-ready deployment
+* Production-ready deployment workflows
 
 ---
 
 ## Dataset
 
 This project uses the **UNSW-NB15** dataset for training and evaluation.
-Dataset files are included for experimentation and development purposes.
+The dataset is widely used in intrusion detection research and contains both normal and malicious network traffic samples.
+
 
 ---
 
+This repository is intended for **educational, research, and demonstration purposes**.
 
-*This repository is intended for educational, research, and demonstration purposes.*
-
-
-
-Just tell me 👍
 ```
+
