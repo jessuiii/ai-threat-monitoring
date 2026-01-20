@@ -4,7 +4,8 @@ import time
 packet_count = defaultdict(int)
 byte_count = defaultdict(int)
 port_set = defaultdict(set)
-timestamps = defaultdict(lambda: deque(maxlen=20))
+timestamps = defaultdict(lambda: deque(maxlen=30))
+packet_sizes = defaultdict(list)
 
 def extract(packet):
     if not hasattr(packet, "ip"):
@@ -14,8 +15,9 @@ def extract(packet):
     now = time.time()
 
     packet_count[src] += 1
-    byte_count[src] += int(packet.length)
+    byte_count[src] += packet.length
     timestamps[src].append(now)
+    packet_sizes[src].append(packet.length)
 
     elapsed = now - timestamps[src][0] if len(timestamps[src]) > 1 else 1
     rate = packet_count[src] / elapsed
@@ -27,6 +29,8 @@ def extract(packet):
     if hasattr(packet, "tcp"):
         port_set[src].add(packet.tcp.dstport)
 
+    avg_pkt_size = sum(packet_sizes[src]) / len(packet_sizes[src])
+
     return {
         "timestamp": now,
         "src_ip": src,
@@ -35,6 +39,6 @@ def extract(packet):
         "spkts": packet_count[src],
         "sbytes": byte_count[src],
         "ct_src_dport_ltm": len(port_set[src]),
-        "ct_srv_src": packet_count[src],
+        "avg_pkt_size": avg_pkt_size,
         "true_attack": packet.attack_type
     }
