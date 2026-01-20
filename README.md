@@ -1,245 +1,219 @@
-🛡️ AI Threat Monitoring System
-Hybrid ML + Adaptive Memory–Driven Network Intrusion Detection
+# 🛡️ AI Threat Monitoring System
+### Hybrid ML + Adaptive Memory–Driven Network Intrusion Detection
 
-Overview
-This project is a real-time network threat monitoring system that combines:
+---
 
-Classical machine learning (Random Forest IDS)
+## Overview
 
-Adaptive “quantum-inspired” risk modulation
+This project is a **real-time network threat monitoring system** that combines:
 
-Persistent threat memory stored in a database
+- Classical machine learning (Random Forest–based IDS)
+- Adaptive *quantum-inspired* risk modulation
+- Persistent threat memory stored in a database
+- Live attack simulation and visualization dashboard
 
-Live attack simulation and visualization dashboard
+Unlike traditional intrusion detection systems (IDS) that treat every packet independently, this system **learns from repeated behavior over time**. It escalates risk for recurring suspicious sources even when individual packets appear benign.
 
-Unlike traditional IDS systems that treat every packet independently, this system learns from repeated behavior over time and escalates risk for recurring suspicious sources, even if individual packets look benign.
+---
 
-What This System Actually Does
-At a high level:
+## What This System Does
 
-It watches live network-like traffic, extracts behavioral features per source IP, scores each event using a trained ML model, adapts risk based on historical behavior, stores memory in a database, and visualizes threats in real time.
+At a high level, the system:
 
-In short:
-It detects slow, bursty, and persistent attacks that signature-based or stateless ML systems miss.
+- Observes live, network-like traffic
+- Extracts behavioral features per source IP
+- Scores each event using a trained ML model
+- Adapts risk based on historical behavior
+- Persists threat memory in a database
+- Visualizes threats in real time via a dashboard
 
-High-Level Architecture
-┌──────────────────────┐
-│ Security Simulation  │
-│ (Traffic Generator)  │
-└─────────┬────────────┘
-          │
-          ▼
-┌──────────────────────┐
-│ Feature Extraction   │
-│ (rate, burst, ports) │
-└─────────┬────────────┘
-          │
-          ▼
-┌────────────────────────────────────┐
-│ FastAPI Backend                     │
-│  ├ Classical ML (Random Forest)     │
-│  ├ Adaptive Quantum Risk Layer      │
-│  ├ Threat Memory (Postgres)         │
-│  └ Event Storage (Postgres)         │
-└─────────┬──────────────────────────┘
-          │
-          ▼
-┌──────────────────────┐
-│ React Dashboard      │
-│  ├ Live Events       │
-│  └ Active Alerts     │
-└──────────────────────┘
-Core Components
-1. Security Simulation
-Simulates both benign and malicious traffic:
+**In short:**  
+It detects **slow, bursty, and persistent attacks** that signature-based or stateless ML systems often miss.
 
-Normal traffic:
 
-Random IPs
+---
 
-Low packet sizes
+## Core Components
 
-Random high ports
+### 1. Security Simulation
 
-Attack traffic:
+Simulates both benign and malicious network traffic.
 
-Repeated IPs
+**Normal traffic**
+- Random IP addresses
+- Low packet sizes
+- Random high ports
 
-High burst rates
+**Attack traffic**
+- Repeated source IPs
+- High burst rates
+- Suspicious ports (22, 23, 445, 3389)
+- Large packet sizes
 
-Suspicious ports (22, 23, 445, 3389)
+This enables safe validation without real network access.
 
-Large packet sizes
+---
 
-This lets you validate detection without real network access.
+### 2. Feature Extraction
 
-2. Feature Extraction
-For each source IP, the system computes:
+For each source IP, the system computes behavioral features:
 
-Feature	Meaning
-rate	Packets per second
-burst_rate	Short-window packet intensity
-spkts	Total packets seen
-sbytes	Total bytes sent
-ct_src_dport_ltm	Distinct destination ports
-ct_srv_src	Connection count
-These features capture behavioral patterns, not packet contents.
+| Feature | Description |
+|------|-----------|
+| rate | Packets per second |
+| burst_rate | Short-window packet intensity |
+| spkts | Total packets seen |
+| sbytes | Total bytes sent |
+| ct_src_dport_ltm | Distinct destination ports |
+| ct_srv_src | Connection count |
 
-3. Classical ML Layer (Random Forest IDS)
-Trained on labeled traffic data
+These features capture **behavioral patterns**, not packet payloads.
 
-Outputs a probability of malicious behavior
+---
 
-Handles:
+### 3. Classical ML Layer (Random Forest IDS)
 
-Non-linear relationships
+- Trained on labeled network traffic data
+- Outputs probability of malicious behavior
+- Handles non-linear relationships and class imbalance
 
-Mixed feature scales
+This layer provides the **baseline statistical risk score**.
 
-Imbalanced attack data
+---
 
-This provides the baseline statistical risk.
+### 4. Adaptive Quantum-Inspired Risk Layer
 
-4. Adaptive Quantum-Inspired Risk Layer
-This is not a real quantum computer — it is quantum-inspired math.
+This is **quantum-inspired mathematics**, not a real quantum computer.
 
 It:
+- Modulates classical risk using non-linear sine-based functions
+- Increases sensitivity as recurrence grows
+- Amplifies uncertainty for unstable behavior
 
-Modulates classical risk using a non-linear sine-based function
+**Purpose:**  
+Prevent attackers from staying below static thresholds.
 
-Becomes more sensitive as recurrence increases
+---
 
-Introduces uncertainty amplification for unstable behavior
+### 5. Threat Memory (Persistence Layer)
 
-Purpose:
+Each source IP has persistent state stored in the database:
 
-Prevent attackers from staying below static thresholds
+| Field | Purpose |
+|----|-------|
+| recurrence | Number of times IP observed |
+| risk_score | Highest observed risk |
+| last_seen | Last activity timestamp |
 
-5. Threat Memory (Persistence Layer)
-Each source IP has state stored in the database:
-
-Field	Purpose
-recurrence	How many times the IP was seen
-risk_score	Highest observed risk
-last_seen	Last activity timestamp
 This enables:
+- Risk escalation over time
+- Long-term attacker tracking
+- Memory across system restarts
 
-Escalation over time
+This is the **key differentiator** from traditional IDS systems.
 
-Long-term attacker tracking
+---
 
-Memory across restarts
+### 6. Hybrid Decision Engine
 
-This is the key differentiator from traditional IDS systems.
-
-6. Hybrid Decision Engine
 Final risk is computed as:
 
 final_risk =
-    α * classical_risk
-  + (1 − α) * quantum_risk
-  + escalation(recurrence)
+α * classical_risk
+
+(1 − α) * quantum_risk
+
+escalation(recurrence)
+
+
 This ensures:
+- First-time events don’t over-trigger
+- Persistent attackers are flagged even when subtle
 
-First-time events don’t over-trigger
+---
 
-Persistent attackers get flagged even if subtle
+### 7. FastAPI Backend
 
-7. FastAPI Backend
 Responsibilities:
+- Accept events
+- Run hybrid inference
+- Store results
+- Maintain threat memory
+- Serve live data to frontend
 
-Accept events
+**Key Endpoints**
+- `POST /events` — ingest and store events
+- `GET /events` — fetch recent events
+- `POST /events/predict` — prediction-only inference
 
-Run hybrid inference
+---
 
-Store results
+### 8. React Frontend Dashboard
 
-Maintain threat memory
-
-Serve live data to frontend
-
-Endpoints:
-
-POST /events — ingest & store events
-
-GET /events — fetch recent events
-
-POST /events/predict — prediction only
-
-8. React Frontend Dashboard
 Live UI features:
-
-Live traffic table
-
-Threat confidence & distance
-
-Active alert panel
-
-Auto-refresh every 2 seconds
+- Live traffic table
+- Threat confidence and distance metrics
+- Active alert panel
+- Auto-refresh every 2 seconds
 
 Alerts trigger when:
+- Risk exceeds thresholds
+- Threat distance indicates instability
+- Recurring attackers escalate
 
-Risk crosses thresholds
+---
 
-Threat distance indicates instability
+## Why Everything Looked “Normal” Initially
 
-Repeated attackers escalate
-
-Why Everything Was “Normal” Initially
-Early on:
-
-Burst behavior wasn’t present
-
-Memory had no recurrence
-
-ML model saw isolated benign patterns
+Early in execution:
+- Burst behavior was absent
+- Threat memory had no recurrence
+- ML model saw isolated benign patterns
 
 Once:
+- Burst rates increased
+- Attack simulation intensified
+- Memory persistence activated
 
-Burst rate was added
+➡️ Risk escalation occurred **as designed**.
 
-Attack simulation increased
+This behavior is expected and correct.
 
-Memory persistence enabled
+---
 
-→ Risk escalated as designed
+## What Makes This Project Unique
 
-This is expected and correct behavior.
+✅ Stateful ML with memory awareness  
+✅ Adaptive risk escalation  
+✅ Real-time simulation and detection  
+✅ Database-backed threat intelligence  
+✅ Live visualization  
+✅ Extensible to real packet capture  
 
-What Makes This Project Unique
-✅ Stateful ML (memory-aware)
-✅ Adaptive risk escalation
-✅ Real-time simulation + detection
-✅ Database-backed threat intelligence
-✅ Live visualization
-✅ Extensible to real packet capture
+This is not just a demo — it is an **architecture pattern for modern AI-driven security systems**.
 
-This is not just a demo — it’s an architecture pattern for modern AI-driven security systems.
+---
 
-How This Could Be Used in Practice
-SOC threat triage
+## Practical Use Cases
 
-Network anomaly detection
+- SOC threat triage
+- Network anomaly detection
+- Insider threat monitoring
+- Edge security systems
+- Research on adaptive IDS models
 
-Insider threat monitoring
+---
 
-Edge security systems
+## Final Summary
 
-Research into adaptive IDS models
-
-Final Summary
-This system learns how attackers behave over time, not just what a single packet looks like.
+This system learns **how attackers behave over time**, not just what a single packet looks like.
 
 It bridges:
+- Classical machine learning
+- Temporal reasoning
+- Adaptive risk modeling
+- Real-time observability
 
-Classical ML
+**In practical terms:**  
+It turns network noise into **actionable intelligence**.
 
-Temporal reasoning
-
-Adaptive risk modeling
-
-Real-time observability
-
-In practical terms:
-
-It turns network noise into actionable intelligence.
