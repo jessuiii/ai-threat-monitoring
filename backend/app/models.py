@@ -25,3 +25,10 @@ class AlertThreshold(Base):
     high_risk = Column(Float, default=0.8)
     suspicious = Column(Float, default=0.5)
 
+class ThreatState(Base):
+    __tablename__ = "threat_states"
+
+    src_ip = Column(String, primary_key=True)
+    recurrence = Column(Integer, default=0)
+    risk_score = Column(Float, default=0.0)
+    last_seen = Column(TIMESTAMP)

@@ -1,10 +1,11 @@
-from collections import defaultdict
+# security_simulation/feature_extractor.py
+from collections import defaultdict, deque
 import time
 
 packet_count = defaultdict(int)
 byte_count = defaultdict(int)
 port_set = defaultdict(set)
-last_seen = defaultdict(float)
+timestamps = defaultdict(lambda: deque(maxlen=20))
 
 def extract(packet):
     if not hasattr(packet, "ip"):
@@ -15,20 +16,28 @@ def extract(packet):
 
     packet_count[src] += 1
     byte_count[src] += int(packet.length)
+    timestamps[src].append(now)
 
-    elapsed = now - last_seen.get(src, now)
-    rate = packet_count[src] / elapsed if elapsed > 0 else packet_count[src]
-    last_seen[src] = now
+    # Rate
+    elapsed = now - timestamps[src][0] if len(timestamps[src]) > 1 else 1
+    rate = packet_count[src] / elapsed
+
+    # 🔥 Burst rate
+    burst_rate = (
+        len(timestamps[src]) /
+        max(timestamps[src][-1] - timestamps[src][0], 0.001)
+    )
 
     if hasattr(packet, "tcp"):
         port_set[src].add(packet.tcp.dstport)
 
     return {
-        "timestamp": now,
+        "timestamp": float(now),
         "src_ip": src,
-        "rate": rate,
-        "spkts": packet_count[src],
-        "sbytes": byte_count[src],
-        "ct_src_dport_ltm": len(port_set[src]),
-        "ct_srv_src": packet_count[src]
+        "rate": float(rate),
+        "burst_rate": float(burst_rate),
+        "spkts": int(packet_count[src]),
+        "sbytes": int(byte_count[src]),
+        "ct_src_dport_ltm": int(len(port_set[src])),
+        "ct_srv_src": int(packet_count[src]),
     }

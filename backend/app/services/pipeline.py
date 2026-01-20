@@ -4,6 +4,7 @@ from app.models import NetworkEvent
 from app.services.ml_engine import predict_event
 
 def handle_event(event: dict):
+    print("🔥 Incoming event:", event)
     db = SessionLocal()
     try:
         ml = predict_event(event, key=event["src_ip"])
@@ -23,10 +24,13 @@ def handle_event(event: dict):
 
         db.add(record)
         db.commit()
+
         return ml
 
     except Exception as e:
         db.rollback()
+        print("❌ DB ERROR:", e)   # ← ADD THIS
+        raise e 
         return {
             "label": "ERROR",
             "confidence": 0.0,

@@ -1,14 +1,9 @@
-import pyshark
 from attack_scenarios import generate_packet
-
-MODE = "SIMULATED"  # LIVE or SIMULATED
-INTERFACE = "Wi-Fi"
+import time
+import random
 
 def packet_stream():
-    if MODE == "LIVE":
-        capture = pyshark.LiveCapture(interface=INTERFACE)
-        for packet in capture.sniff_continuously():
-            yield packet
-    else:
-        while True:
-            yield generate_packet()
+    while True:
+        attack = random.random() < 0.35  # 🔥 35% attack traffic
+        yield generate_packet(attack=attack)
+        time.sleep(0.05)
