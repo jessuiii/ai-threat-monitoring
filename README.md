@@ -1,5 +1,3 @@
----
-
 ```md
 # AI-Powered Threat Monitoring & Security Analytics Platform  
 ### UNSW-NB15 — MVP
