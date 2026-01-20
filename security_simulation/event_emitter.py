@@ -10,8 +10,8 @@ def run():
         event = extract(packet)
         if event:
             event["predicted_attack"] = classify(event)
-            requests.post(BACKEND_URL, json=event, timeout=5)
             print(event)
+            requests.post(BACKEND_URL, json=event, timeout=5)
 
 if __name__ == "__main__":
     run()
