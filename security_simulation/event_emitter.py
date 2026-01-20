@@ -1,17 +1,30 @@
-import requests
+import pandas as pd
 from traffic_capture import packet_stream
 from feature_extractor import extract
-from attack_classifier import classify
 
-BACKEND_URL = "http://localhost:8000/events/"
+from ml_quantum.classical_inference import classical_risk
+from ml_quantum.alert_logic import classify_risk
 
 def run():
     for packet in packet_stream():
-        event = extract(packet)
-        if event:
-            event["predicted_attack"] = classify(event)
-            print(event)
-            requests.post(BACKEND_URL, json=event, timeout=5)
+        features = extract(packet)
+        if not features:
+            continue
+
+        # Convert single event → DataFrame (ML expects DF)
+        df = pd.DataFrame([features])
+
+        # ML inference
+        risk = classical_risk(df)[0]
+        alert = classify_risk([risk])[0]
+
+        event = {
+            **features,
+            "risk_score": float(risk),
+            "alert": alert
+        }
+
+        print(event)
 
 if __name__ == "__main__":
     run()
