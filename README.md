@@ -1,142 +1,245 @@
+🛡️ AI Threat Monitoring System
+Hybrid ML + Adaptive Memory–Driven Network Intrusion Detection
 
-# AI-Powered Threat Monitoring & Security Analytics Platform
-### UNSW-NB15 — MVP
+Overview
+This project is a real-time network threat monitoring system that combines:
 
-## Overview
+Classical machine learning (Random Forest IDS)
 
-This repository contains a **minimum viable product (MVP)** for an AI-powered cyber threat monitoring and security analytics platform built using the **UNSW-NB15 intrusion detection dataset**.
+Adaptive “quantum-inspired” risk modulation
 
-The project focuses on detecting, simulating, and analyzing network-based threats using classical machine learning models, a backend API, and a modern frontend dashboard. It is designed to be modular, explainable, and extensible for research, learning, and portfolio demonstration.
+Persistent threat memory stored in a database
 
----
+Live attack simulation and visualization dashboard
 
-## Tech Stack
+Unlike traditional IDS systems that treat every packet independently, this system learns from repeated behavior over time and escalates risk for recurring suspicious sources, even if individual packets look benign.
 
-- **Backend:** Python, FastAPI
-- **Machine Learning:** Scikit-learn (Random Forest, Logistic Regression)
-- **Frontend:** React, Vite, Tailwind CSS
-- **Data:** UNSW-NB15 dataset (CSV format)
-- **Simulation:** Custom Python scripts for synthetic attack and traffic generation
+What This System Actually Does
+At a high level:
 
----
+It watches live network-like traffic, extracts behavioral features per source IP, scores each event using a trained ML model, adapts risk based on historical behavior, stores memory in a database, and visualizes threats in real time.
 
-## Project Structure
+In short:
+It detects slow, bursty, and persistent attacks that signature-based or stateless ML systems miss.
 
-```
+High-Level Architecture
+┌──────────────────────┐
+│ Security Simulation  │
+│ (Traffic Generator)  │
+└─────────┬────────────┘
+          │
+          ▼
+┌──────────────────────┐
+│ Feature Extraction   │
+│ (rate, burst, ports) │
+└─────────┬────────────┘
+          │
+          ▼
+┌────────────────────────────────────┐
+│ FastAPI Backend                     │
+│  ├ Classical ML (Random Forest)     │
+│  ├ Adaptive Quantum Risk Layer      │
+│  ├ Threat Memory (Postgres)         │
+│  └ Event Storage (Postgres)         │
+└─────────┬──────────────────────────┘
+          │
+          ▼
+┌──────────────────────┐
+│ React Dashboard      │
+│  ├ Live Events       │
+│  └ Active Alerts     │
+└──────────────────────┘
+Core Components
+1. Security Simulation
+Simulates both benign and malicious traffic:
 
-backend/                 # FastAPI backend and ML services
-│── app/
-│   ├── routes/          # API routes
-│   ├── services/        # ML pipelines and inference logic
-│   ├── schemas.py       # Pydantic schemas
-│   ├── database.py     # Database utilities
-│
-│── ml_quantum/          # ML and hybrid threat detection modules
-│
-frontend/                # React dashboard (Vite + Tailwind)
-│── src/
-│   ├── components/
-│   ├── pages/
-│
-dataset/                 # UNSW-NB15 data and metadata
-security_simulation/     # Attack traffic and log simulation tools
+Normal traffic:
 
-````
+Random IPs
 
----
+Low packet sizes
 
-## Features
+Random high ports
 
-- API-based log ingestion (batch and simulated data)
-- Machine-learning-driven intrusion detection
-- Modular ML training, inference, and evaluation pipelines
-- Synthetic attack and network traffic simulation
-- Confidence-aware predictions
-- Interactive frontend dashboard for alerts and live monitoring
-- Clean and scalable project architecture
+Attack traffic:
 
----
+Repeated IPs
 
-## Local Setup (Without Docker)
+High burst rates
 
-### 1. Clone the repository
+Suspicious ports (22, 23, 445, 3389)
 
-```bash
-git clone https://github.com/jessuiii/ai-threat-monitoring.git
-cd ai-threat-monitoring
-````
+Large packet sizes
 
----
+This lets you validate detection without real network access.
 
-### 2. Backend setup
+2. Feature Extraction
+For each source IP, the system computes:
 
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
+Feature	Meaning
+rate	Packets per second
+burst_rate	Short-window packet intensity
+spkts	Total packets seen
+sbytes	Total bytes sent
+ct_src_dport_ltm	Distinct destination ports
+ct_srv_src	Connection count
+These features capture behavioral patterns, not packet contents.
 
-Run the backend server:
+3. Classical ML Layer (Random Forest IDS)
+Trained on labeled traffic data
 
-```bash
-uvicorn app.main:app --reload
-```
+Outputs a probability of malicious behavior
 
-Backend API will be available at:
+Handles:
 
-```
-http://127.0.0.1:8000
-```
+Non-linear relationships
 
----
+Mixed feature scales
 
-### 3. Frontend setup
+Imbalanced attack data
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+This provides the baseline statistical risk.
 
-Frontend application will be available at:
+4. Adaptive Quantum-Inspired Risk Layer
+This is not a real quantum computer — it is quantum-inspired math.
 
-```
-http://localhost:5173
-```
+It:
 
----
+Modulates classical risk using a non-linear sine-based function
 
-## Use Cases
+Becomes more sensitive as recurrence increases
 
-* AI-assisted intrusion detection research
-* Security analytics and SOC dashboard prototyping
-* Machine learning experimentation on network traffic data
-* Academic, learning, and portfolio cybersecurity projects
+Introduces uncertainty amplification for unstable behavior
 
----
+Purpose:
 
-## MVP Scope & Future Improvements
+Prevent attackers from staying below static thresholds
 
-This project currently represents an **early-stage MVP**. Planned future enhancements include:
+5. Threat Memory (Persistence Layer)
+Each source IP has state stored in the database:
 
-* Advanced model explainability and visualization
-* Real-time data streaming and ingestion
-* Authentication and role-based access control
-* Alerting and notification pipelines
-* Production-ready deployment workflows
+Field	Purpose
+recurrence	How many times the IP was seen
+risk_score	Highest observed risk
+last_seen	Last activity timestamp
+This enables:
 
----
+Escalation over time
 
-## Dataset
+Long-term attacker tracking
 
-This project uses the **UNSW-NB15** dataset for training and evaluation.
-The dataset is widely used in intrusion detection research and contains both normal and malicious network traffic samples.
+Memory across restarts
 
+This is the key differentiator from traditional IDS systems.
 
----
+6. Hybrid Decision Engine
+Final risk is computed as:
 
-This repository is intended for **educational, research, and demonstration purposes**.
+final_risk =
+    α * classical_risk
+  + (1 − α) * quantum_risk
+  + escalation(recurrence)
+This ensures:
 
-```
+First-time events don’t over-trigger
 
+Persistent attackers get flagged even if subtle
+
+7. FastAPI Backend
+Responsibilities:
+
+Accept events
+
+Run hybrid inference
+
+Store results
+
+Maintain threat memory
+
+Serve live data to frontend
+
+Endpoints:
+
+POST /events — ingest & store events
+
+GET /events — fetch recent events
+
+POST /events/predict — prediction only
+
+8. React Frontend Dashboard
+Live UI features:
+
+Live traffic table
+
+Threat confidence & distance
+
+Active alert panel
+
+Auto-refresh every 2 seconds
+
+Alerts trigger when:
+
+Risk crosses thresholds
+
+Threat distance indicates instability
+
+Repeated attackers escalate
+
+Why Everything Was “Normal” Initially
+Early on:
+
+Burst behavior wasn’t present
+
+Memory had no recurrence
+
+ML model saw isolated benign patterns
+
+Once:
+
+Burst rate was added
+
+Attack simulation increased
+
+Memory persistence enabled
+
+→ Risk escalated as designed
+
+This is expected and correct behavior.
+
+What Makes This Project Unique
+✅ Stateful ML (memory-aware)
+✅ Adaptive risk escalation
+✅ Real-time simulation + detection
+✅ Database-backed threat intelligence
+✅ Live visualization
+✅ Extensible to real packet capture
+
+This is not just a demo — it’s an architecture pattern for modern AI-driven security systems.
+
+How This Could Be Used in Practice
+SOC threat triage
+
+Network anomaly detection
+
+Insider threat monitoring
+
+Edge security systems
+
+Research into adaptive IDS models
+
+Final Summary
+This system learns how attackers behave over time, not just what a single packet looks like.
+
+It bridges:
+
+Classical ML
+
+Temporal reasoning
+
+Adaptive risk modeling
+
+Real-time observability
+
+In practical terms:
+
+It turns network noise into actionable intelligence.
