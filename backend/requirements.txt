@@ -1,12 +1,14 @@
-# Backend requirements
-fastapi
-uvicorn
-scikit-learn
-pandas
-sqlalchemy
-asyncpg
-psycopg2-binary
-python-jose[cryptography]
-passlib[bcrypt]
-python-dotenv
-alembic
+# --- Core backend ---
+fastapi==0.110.0
+uvicorn==0.27.1
+sqlalchemy==2.0.25
+psycopg[binary]>=3.2.2
+requests==2.31.0
+python-dotenv==1.0.1
+
+# --- ML + Quantum (PINNED for pickle compatibility) ---
+numpy==1.26.4
+pandas==2.0.3
+scikit-learn==1.2.2
+joblib==1.2.0
+scipy==1.10.1

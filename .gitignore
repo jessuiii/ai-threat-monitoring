@@ -1,0 +1,44 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+venv/
+.env
+
+# =========================
+# ML artifacts (OPTIONAL)
+# =========================
+# Uncomment if you don't want to push trained models
+# ml/*.pkl
+
+# =========================
+# Node / Frontend
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =========================
+# Outputs (generated files)
+# =========================
+outputs/*.csv
+
+# =========================
+# Database / Secrets
+# =========================
+*.sqlite
+*.db
