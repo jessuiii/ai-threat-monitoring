@@ -1,10 +1,9 @@
 from collections import defaultdict, deque
 import time
 
-packet_count = defaultdict(int)
-byte_count = defaultdict(int)
-port_set = defaultdict(set)
-timestamps = defaultdict(lambda: deque(maxlen=50))
+WINDOW_SECONDS = 10
+
+packet_buffer = defaultdict(deque)
 session_start = {}
 
 def extract(packet):
@@ -14,24 +13,38 @@ def extract(packet):
     src = packet.ip.src
     now = time.time()
 
-    packet_count[src] += 1
-    byte_count[src] += packet.length
-    port_set[src].add(packet.tcp.dstport)
-    timestamps[src].append(now)
-
     if src not in session_start:
         session_start[src] = now
 
-    elapsed = now - timestamps[src][0] if len(timestamps[src]) > 1 else 1
+    # Store packet info
+    packet_buffer[src].append({
+        "time": now,
+        "size": packet.length,
+        "dst_port": packet.tcp.dstport
+    })
+
+    # Remove expired packets
+    while packet_buffer[src] and now - packet_buffer[src][0]["time"] > WINDOW_SECONDS:
+        packet_buffer[src].popleft()
+
+    # Wait until window has enough data
+    if len(packet_buffer[src]) < 10:
+        return None
+
+    packets = packet_buffer[src]
+
+    times = [p["time"] for p in packets]
+    sizes = [p["size"] for p in packets]
+    ports = {p["dst_port"] for p in packets}
+
+    duration = max(times) - min(times)
+    duration = max(duration, 0.001)
 
     return {
-        # These names MUST exist in train.csv FEATURES
-        "spkts": packet_count[src],
-        "sbytes": byte_count[src],
-        "rate": packet_count[src] / elapsed,
-        "burst_rate": len(timestamps[src]) / max(
-            timestamps[src][-1] - timestamps[src][0], 0.001
-        ),
-        "ct_src_dport_ltm": len(port_set[src]),
+        "spkts": len(packets),
+        "sbytes": sum(sizes),
+        "rate": len(packets) / duration,
+        "burst_rate": len(packets) / duration,
+        "ct_src_dport_ltm": len(ports),
         "session_duration": now - session_start[src],
     }
