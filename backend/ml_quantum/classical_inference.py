@@ -15,11 +15,10 @@ def load_model():
         _bundle = joblib.load(MODEL_PATH)
     return _bundle
 
-def classical_risk(df: pd.DataFrame):
+def predict_attack(df: pd.DataFrame):
     bundle = load_model()
     df = df.copy()
 
-    # 🔥 Option A: burst_rate must exist
     if "burst_rate" not in df.columns:
         df["burst_rate"] = 0.0
 
@@ -31,4 +30,16 @@ def classical_risk(df: pd.DataFrame):
         features=bundle["features"],
     )
 
-    return bundle["model"].predict_proba(X)[:, 1]
+    probs = bundle["model"].predict_proba(X)[0]
+    classes = bundle["classes"]
+
+    result = dict(zip(classes, probs))
+
+    predicted_attack = classes[probs.argmax()]
+    confidence = probs.max()
+
+    return {
+        "attack_type": predicted_attack,
+        "confidence": float(confidence),
+        "distribution": result
+    }
