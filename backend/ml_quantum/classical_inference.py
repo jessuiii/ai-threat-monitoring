@@ -1,26 +1,32 @@
+import os
 import joblib
 from ml_quantum.preprocess import preprocess
-import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 MODEL_PATH = os.path.join(
     BASE_DIR,
-    "ml",
-    "rf_ids_model.pkl"
+    "rf_ids_model.pkl"   # ✅ model is in ml_quantum/
 )
 
-bundle = joblib.load(MODEL_PATH)
+_bundle = None
 
-rf_model = bundle["model"]
-FEATURES = bundle["features"]
-encoders = bundle["encoders"]
-scaler = bundle["scaler"]
+def load_model():
+    global _bundle
+    if _bundle is None:
+        _bundle = joblib.load(MODEL_PATH)
+    return _bundle
+
 
 def classical_risk(df):
+    bundle = load_model()
+
+    rf_model = bundle["model"]
+    FEATURES = bundle["features"]
+    encoders = bundle["encoders"]
+    scaler = bundle["scaler"]
+
     X, _ = preprocess(df, fit=False, encoders=encoders, scaler=scaler)
     X = X[FEATURES]
 
-    # Probability of attack (class = 1)
-    probs = rf_model.predict_proba(X)[:, 1]
-    return probs
+    return rf_model.predict_proba(X)[:, 1]

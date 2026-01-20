@@ -1,13 +1,11 @@
+# quantum_module.py
 import numpy as np
 
-def quantum_risk(classical_probs):
-    """
-    Quantum-inspired probability transformation
-    """
-    # Map probability to angle (quantum state)
-    theta = classical_probs * np.pi
+def adaptive_quantum_risk(classical_prob, memory):
+    adaptive_factor = 1 + min(memory["recurrence"] * 0.05, 1.0)
+    phase_shift = memory["confidence_drift"]
 
-    # Quantum probability via amplitude interference
-    quantum_probs = np.sin(theta) ** 2
+    theta = classical_prob * np.pi * adaptive_factor
+    quantum_prob = np.sin(theta + phase_shift) ** 2
 
-    return quantum_probs
+    return quantum_prob

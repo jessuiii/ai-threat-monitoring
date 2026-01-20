@@ -1,19 +1,30 @@
+import os
 import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
-from preprocess import preprocess
+from ml_quantum.preprocess import preprocess
 
-# 1️⃣ Load FULL training dataset
-df = pd.read_csv("dataset/raw/train.csv")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-print(f"Dataset shape: {df.shape}")
+DATASET_PATH = os.path.join(
+    BASE_DIR, "..", "..", "dataset", "raw", "train.csv"
+)
 
-# 2️⃣ Preprocess (FIT MODE)
+MODEL_PATH = os.path.join(
+    BASE_DIR, "rf_ids_model.pkl"
+)
+
+print("📂 Loading dataset from:", DATASET_PATH)
+
+df = pd.read_csv(DATASET_PATH)
+
+print("Dataset shape:", df.shape)
+
+# FIT MODE
 X, y, encoders, scaler, FEATURES = preprocess(df, fit=True)
 
-print(f"Training features: {len(FEATURES)}")
+print("Number of features:", len(FEATURES))
 
-# 3️⃣ Initialize Random Forest
 rf = RandomForestClassifier(
     n_estimators=200,
     max_depth=20,
@@ -21,18 +32,16 @@ rf = RandomForestClassifier(
     n_jobs=-1
 )
 
-# 4️⃣ Train model on FULL data
+print("🚀 Training Random Forest...")
 rf.fit(X, y)
 
-# 5️⃣ Save EVERYTHING needed for inference
-joblib.dump(
-    {
-        "model": rf,
-        "features": FEATURES,
-        "encoders": encoders,
-        "scaler": scaler
-    },
-    "ml/rf_ids_model.pkl"
-)
+bundle = {
+    "model": rf,
+    "features": FEATURES,
+    "encoders": encoders,
+    "scaler": scaler
+}
 
-print("✅ Random Forest trained on FULL dataset and saved")
+joblib.dump(bundle, MODEL_PATH, protocol=4)
+
+print("✅ Model retrained and saved to:", MODEL_PATH)

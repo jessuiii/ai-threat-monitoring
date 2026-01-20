@@ -6,7 +6,7 @@ from app.services.ml_engine import predict_event
 def handle_event(event: dict):
     db = SessionLocal()
     try:
-        ml = predict_event(event)
+        ml = predict_event(event, key=event["src_ip"])
 
         record = NetworkEvent(
             timestamp=datetime.fromtimestamp(event["timestamp"]),
