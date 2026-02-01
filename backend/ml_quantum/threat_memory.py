@@ -7,17 +7,47 @@ class ThreatMemory:
         self.memory = defaultdict(lambda: {
             "risk_accumulator": 0.0,
             "recurrence": 0,
-            "volatility": 0.0,
-            "confidence_drift": 0.0,
+            "normalized_recurrence": 0.0,
             "last_seen": None
         })
+        
+        # Hyperparameters
+        self.DELTA = 0.01  # Memory accumulation rate
+        self.LAMBDA = 0.5  # Risk escalation factor
+        self.THETA = 0.8   # Alert threshold
 
-    def get(self, key):
+    def get_state(self, key):
         return self.memory[key]
 
-    def update(self, key, risk, confidence):
+    def update_state(self, key, current_risk):
+        """
+        Updates memory state based on current risk.
+        
+        M(t+1) = M(t) + delta * R(t)
+        R'(t)  = R(t) + lambda * M(t)
+        """
         m = self.memory[key]
-        m["risk_accumulator"] += risk
+        
+        # 1. Update Recurrence Count
         m["recurrence"] += 1
-        m["confidence_drift"] = abs(m["risk_accumulator"] / m["recurrence"] - confidence)
         m["last_seen"] = datetime.utcnow()
+        
+        # 2. Accumulate Memory: M(t+1) = M(t) + delta * R(t)
+        # We cap normalized_recurrence at 1.0 to prevent infinite growth
+        m["normalized_recurrence"] = min(m["normalized_recurrence"] + (self.DELTA * current_risk), 1.0)
+        
+        # 3. Progressive Risk Escalation: R'(t) = R(t) + lambda * M(t)
+        escalated_risk = current_risk + (self.LAMBDA * m["normalized_recurrence"])
+        
+        # Cap escalated risk at 1.0
+        escalated_risk = min(escalated_risk, 1.0)
+        
+        # 4. Check Alert Condition
+        alert = escalated_risk >= self.THETA
+        
+        return {
+            "escalated_risk": escalated_risk,
+            "memory_value": m["normalized_recurrence"],
+            "recurrence": m["recurrence"],
+            "alert": alert
+        }

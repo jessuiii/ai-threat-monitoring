@@ -2,7 +2,10 @@
 import os
 import joblib
 import pandas as pd
-from ml_quantum.preprocess import preprocess
+try:
+    from backend.ml_quantum.preprocess import preprocess
+except ImportError:
+    from ml_quantum.preprocess import preprocess
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,6 +33,10 @@ def predict_attack(df: pd.DataFrame):
         scaler=bundle["scaler"],
         features=bundle["features"],
     )
+
+    # Filter to selected features for the model
+    if "selected_features" in bundle:
+        X = X[bundle["selected_features"]]
 
     probs = bundle["model"].predict_proba(X)[0]
     classes = bundle["classes"]

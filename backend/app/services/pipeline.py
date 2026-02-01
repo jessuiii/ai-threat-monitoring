@@ -17,6 +17,7 @@ def handle_event(event, db: Session):
             sbytes=payload["sbytes"],
             ct_src_dport_ltm=payload["ct_src_dport_ltm"],
             ct_srv_src=payload["ct_srv_src"],
+            service=payload.get("service", "-"), # NEW
             attack_type=result["attack_type"],
             confidence=result["confidence"],
             threat_distance=result["threat_distance"],

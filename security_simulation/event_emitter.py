@@ -19,12 +19,8 @@ def run():
         event = {
             "timestamp": time.time(),
             "src_ip": packet.ip.src,
-            "rate": features["rate"],
-            "spkts": features["spkts"],
-            "sbytes": features["sbytes"],
-            "ct_src_dport_ltm": features["ct_src_dport_ltm"],
-            "ct_srv_src": features["ct_srv_src"],
-            "burst_rate": features["burst_rate"],
+            # Unpack all calculated features (dur, sload, smean, etc.)
+            **features
         }
 
         try:
@@ -32,13 +28,13 @@ def run():
             session.post(
                 BACKEND_URL,
                 json=event,
-                timeout=0.3
+                timeout=1.0
             )
         except requests.exceptions.RequestException:
             pass  # DROP packet silently (realistic)
 
-        # 🔥 HARD RATE LIMIT
-        time.sleep(0.15)  # ~6–7 events/sec
+        # 🔥 REMOVE HARD LIMIT to allow full speed but prevent lockup
+        time.sleep(0.002)
 
 if __name__ == "__main__":
     run()

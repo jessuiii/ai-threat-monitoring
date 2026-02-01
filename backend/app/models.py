@@ -14,6 +14,7 @@ class NetworkEvent(Base):
     sbytes = Column(Integer)
     ct_src_dport_ltm = Column(Integer)
     ct_srv_src = Column(Integer)
+    service = Column(String)  # NEW: Service field
 
     attack_type = Column(String)
     confidence = Column(Float)

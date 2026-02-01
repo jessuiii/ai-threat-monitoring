@@ -1,9 +1,10 @@
 import Dashboard from "./pages/Dashboard";
+import Layout from "./components/Layout";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
+    <Layout>
       <Dashboard />
-    </div>
+    </Layout>
   );
 }

@@ -34,6 +34,7 @@ def get_events(limit: int = 50, db: Session = Depends(get_db)):
             "rate": r.rate,
             "spkts": r.spkts,
             "sbytes": r.sbytes,
+            "service": r.service, # NEW
             "attack_type": r.attack_type,
             "confidence": r.confidence,
             "threat_distance": r.threat_distance,
