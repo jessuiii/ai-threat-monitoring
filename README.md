@@ -3,217 +3,177 @@
 
 ---
 
-## Overview
+## 📖 Overview
 
 This project is a **real-time network threat monitoring system** that combines:
+- **Classical Machine Learning**: Random Forest–based IDS (Intrusion Detection System).
+- **Adaptive Quantum-Inspired Risk**: Non-linear risk modulation based on behavior entropy.
+- **Persistent Threat Memory**: Database-backed tracking of suspicious IPs over time.
+- **Live Visualization**: Real-time dashboard for monitoring network traffic and identifying advanced persistent threats.
 
-- Classical machine learning (Random Forest–based IDS)
-- Adaptive *quantum-inspired* risk modulation
-- Persistent threat memory stored in a database
-- Live attack simulation and visualization dashboard
-
-Unlike traditional intrusion detection systems (IDS) that treat every packet independently, this system **learns from repeated behavior over time**. It escalates risk for recurring suspicious sources even when individual packets appear benign.
-
----
-
-## What This System Does
-
-At a high level, the system:
-
-- Observes live, network-like traffic
-- Extracts behavioral features per source IP
-- Scores each event using a trained ML model
-- Adapts risk based on historical behavior
-- Persists threat memory in a database
-- Visualizes threats in real time via a dashboard
-
-**In short:**  
-It detects **slow, bursty, and persistent attacks** that signature-based or stateless ML systems often miss.
-
+Unlike traditional IDS that treat every packet independently, this system **learns from repeated behavior over time**, escalating risk for recurring suspicious sources even when individual packets appear benign.
 
 ---
 
-## Core Components
+## 🏗️ Architecture & Core Components
 
-### 1. Security Simulation
+### 1. Security Simulation (Traffic Generator)
+Simulates realistic network traffic patterns for testing without needing a real physical network tap.
+- **Normal Traffic**: Web browsing, DNS queries, random high ports.
+- **Attack Variations**: 
+    - **DoS**: High-frequency packet bursts.
+    - **Exploits**: Payload-heavy traffic targeting web ports.
+    - **Reconnaissance**: Low-volume port scanning.
+    - **Burst Mode**: Simulates rapid fire attacks vs. slow-and-low evasion.
 
-Simulates both benign and malicious network traffic.
+### 2. Feature Extractor
+Converts raw packet data into behavioral features:
+- `rate`: Packets per second per IP.
+- `burst_rate`: Short-window intensity.
+- `ct_src_dport_ltm`: Count of distinct destination ports.
+- `sbytes/spkts`: Volume metrics.
 
-**Normal traffic**
-- Random IP addresses
-- Low packet sizes
-- Random high ports
+### 3. Classical ML Layer (Random Forest)
+A pre-trained **Random Forest Classifier** evaluates features to predict the probability of known attack classes (DoS, Analysis, Backdoor, Fuzzers, etc.). It provides the *baseline* statistical confidence.
 
-**Attack traffic**
-- Repeated source IPs
-- High burst rates
-- Suspicious ports (22, 23, 445, 3389)
-- Large packet sizes
+### 4. Quantum-Inspired Risk Engine & Threat Memory
+This is the **"Adaptive Brain"** of the system.
+- **Threat Memory**: A persistent database (sqlite/postgres) tracks `recurrence` (how often an IP is seen) and `history_score`.
+- **Quantum-Inspired Logic**: Uses non-linear functions (sine/entropy) to modulate risk.
+    - *Entropy*: Measures the instability of an attacker's behavior.
+    - *Escalation*: If an IP returns repeatedly, the system amplifies the risk score, catching "low and slow" attacks that might slip past the static ML model.
 
-This enables safe validation without real network access.
-
----
-
-### 2. Feature Extraction
-
-For each source IP, the system computes behavioral features:
-
-| Feature | Description |
-|------|-----------|
-| rate | Packets per second |
-| burst_rate | Short-window packet intensity |
-| spkts | Total packets seen |
-| sbytes | Total bytes sent |
-| ct_src_dport_ltm | Distinct destination ports |
-| ct_srv_src | Connection count |
-
-These features capture **behavioral patterns**, not packet payloads.
+### 5. Frontend Dashboard
+A simplified, high-performance **React** UI that shows:
+- **Live Traffic Table**: Real-time stream of packet events.
+- **Threat Metrics**: Visualizes `Confidence` (ML probability) and `Threat Distance` (Escalated Risk).
+- **Active Alerts**: Instant notifications for high-risk IPs.
 
 ---
 
-### 3. Classical ML Layer (Random Forest IDS)
+## 🚀 Getting Started From Scratch
 
-- Trained on labeled network traffic data
-- Outputs probability of malicious behavior
-- Handles non-linear relationships and class imbalance
+Follow these steps to set up the entire project on your local machine.
 
-This layer provides the **baseline statistical risk score**.
+### 1. Prerequisites
+- **Python 3.10+**
+- **Node.js 18+** & **npm**
+- **Git**
 
----
-
-### 4. Adaptive Quantum-Inspired Risk Layer
-
-This is **quantum-inspired mathematics**, not a real quantum computer.
-
-It:
-- Modulates classical risk using non-linear sine-based functions
-- Increases sensitivity as recurrence grows
-- Amplifies uncertainty for unstable behavior
-
-**Purpose:**  
-Prevent attackers from staying below static thresholds.
+### 2. Clone the Repository
+```bash
+git clone https://github.com/jessuiii/ai-threat-monitoring.git
+cd ai-threat-monitoring
+```
 
 ---
 
-### 5. Threat Memory (Persistence Layer)
+### 3. Backend Setup
+The backend handles data ingestion, ML inference, and the database.
 
-Each source IP has persistent state stored in the database:
-
-| Field | Purpose |
-|----|-------|
-| recurrence | Number of times IP observed |
-| risk_score | Highest observed risk |
-| last_seen | Last activity timestamp |
-
-This enables:
-- Risk escalation over time
-- Long-term attacker tracking
-- Memory across system restarts
-
-This is the **key differentiator** from traditional IDS systems.
+1.  **Create a virtual environment**:
+    ```bash
+    python -m venv venv
+    ```
+2.  **Activate the virtual environment**:
+    - **Windows (PowerShell)**: `.\venv\Scripts\Activate.ps1`
+    - **Mac/Linux**: `source venv/bin/activate`
+3.  **Install dependencies**:
+    ```bash
+    pip install -r backend/requirements.txt
+    ```
 
 ---
 
-### 6. Hybrid Decision Engine
+### 4. Frontend Setup
+The frontend is a React application built with Vite.
 
-Final risk is computed as:
-
-final_risk =
-α * classical_risk
-
-(1 − α) * quantum_risk
-
-escalation(recurrence)
-
-
-This ensures:
-- First-time events don’t over-trigger
-- Persistent attackers are flagged even when subtle
+1.  **Navigate to the frontend directory**:
+    ```bash
+    cd frontend
+    ```
+2.  **Install Node dependencies**:
+    ```bash
+    npm install
+    ```
 
 ---
 
-### 7. FastAPI Backend
+## 🏃‍♂️ Running the Application
 
-Responsibilities:
-- Accept events
-- Run hybrid inference
-- Store results
-- Maintain threat memory
-- Serve live data to frontend
+You will need **three separate terminal instances** to run the full system.
 
-**Key Endpoints**
-- `POST /events` — ingest and store events
-- `GET /events` — fetch recent events
-- `POST /events/predict` — prediction-only inference
+### Terminal 1: Backend Server
+Runs the FastAPI server at `http://127.0.0.1:8000`.
 
----
+```powershell
+# From project root, activate venv first
+.\venv\Scripts\Activate.ps1
 
-### 8. React Frontend Dashboard
+# CRITICAL: Navigate to backend directory to ensure imports work correctly
+cd backend
 
-Live UI features:
-- Live traffic table
-- Threat confidence and distance metrics
-- Active alert panel
-- Auto-refresh every 2 seconds
+# Run the server
+python -m uvicorn app.main:app --reload
+```
 
-Alerts trigger when:
-- Risk exceeds thresholds
-- Threat distance indicates instability
-- Recurring attackers escalate
+### Terminal 2: Frontend Dashboard
+Runs the React UI at `http://localhost:5173`.
 
----
+```powershell
+# From project root
+cd frontend
 
-## Why Everything Looked “Normal” Initially
+# Start the dev server
+npm run dev
+```
 
-Early in execution:
-- Burst behavior was absent
-- Threat memory had no recurrence
-- ML model saw isolated benign patterns
+### Terminal 3: Security Simulation
+Generates synthetic network traffic.
 
-Once:
-- Burst rates increased
-- Attack simulation intensified
-- Memory persistence activated
+```powershell
+# From project root, activate venv
+.\venv\Scripts\Activate.ps1
 
-➡️ Risk escalation occurred **as designed**.
+# Navigate to simulation folder
+cd security_simulation
 
-This behavior is expected and correct.
+# Run the event emitter
+python event_emitter.py
+```
+
 
 ---
 
-## What Makes This Project Unique
+## � Project Structure
 
-✅ Stateful ML with memory awareness  
-✅ Adaptive risk escalation  
-✅ Real-time simulation and detection  
-✅ Database-backed threat intelligence  
-✅ Live visualization  
-✅ Extensible to real packet capture  
-
-This is not just a demo — it is an **architecture pattern for modern AI-driven security systems**.
+```graphql
+project2/
+├── backend/                # FastAPI Application & ML Models
+│   ├── app/                # API Routes & Schemas
+│   ├── ml_quantum/         # Hybrid ML + Quantum Logic
+│   └── requirements.txt    # Python Dependencies
+├── frontend/               # React Dashboard
+│   ├── src/
+│   │   ├── components/     # UI Components (LiveTable, Alerts)
+│   │   └── pages/          # Main Views
+│   └── package.json        # Node Dependencies
+├── security_simulation/    # Traffic Generators
+│   ├── attack_scenarios.py # Attack Logic (DoS, Exploits, etc.)
+│   └── event_emitter.py    # Main script to stream events
+├── dataset/                # Dataset storage
+└── outputs/                # Logs and model outputs
+```
 
 ---
 
-## Practical Use Cases
+## �🛠️ Troubleshooting
 
-- SOC threat triage
-- Network anomaly detection
-- Insider threat monitoring
-- Edge security systems
-- Research on adaptive IDS models
+- **ModuleNotFoundError: No module named 'app'**  
+  Ensure you are in the `backend/` directory when running `uvicorn`.
+
+- **Frontend showing "Disconnected"**  
+  Verify the backend is running on port 8000.
 
 ---
-
-## Final Summary
-
-This system learns **how attackers behave over time**, not just what a single packet looks like.
-
-It bridges:
-- Classical machine learning
-- Temporal reasoning
-- Adaptive risk modeling
-- Real-time observability
-
-**In practical terms:**  
-It turns network noise into **actionable intelligence**.
-
+*Built for Advanced Agentic Coding - Google Deepmind*
