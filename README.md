@@ -165,15 +165,4 @@ project2/
 └── outputs/                # Logs and model outputs
 ```
 
----
 
-## �🛠️ Troubleshooting
-
-- **ModuleNotFoundError: No module named 'app'**  
-  Ensure you are in the `backend/` directory when running `uvicorn`.
-
-- **Frontend showing "Disconnected"**  
-  Verify the backend is running on port 8000.
-
----
-*Built for Advanced Agentic Coding - Google Deepmind*
